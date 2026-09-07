@@ -8,9 +8,11 @@
 #include "server.h"
 #include "parser.h"
 #include "hashtable.h"
+#include "persistence.h"
 
 int main(void) {
     HashTable *ht = ht_create(16);
+    aof_load(ht);
     int server_fd = start_server(6379);
     printf("Server listening on port 6379...\n");
 
@@ -70,6 +72,7 @@ int main(void) {
                 {
                 case CMD_SET: {
                     ht_set(ht, cmd.key, cmd.value);
+                    aof_append(buffer);
                     write(current_fd, "OK\n", 3);
                     break;
                 }
@@ -87,8 +90,10 @@ int main(void) {
                 }
                 case CMD_DEL: {
                     int deleted = ht_delete(ht, cmd.key);
-                    if (deleted) 
+                    if (deleted) {
+                        aof_append(buffer);
                         write(current_fd, "OK\n", 3);
+                    }
                     else
                         write(current_fd, "(nil)\n", 6);
                     break;
