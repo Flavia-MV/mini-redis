@@ -2,3 +2,4 @@
 test_ht
 mini-redis
 *.exe
+*.aof
