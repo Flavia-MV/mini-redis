@@ -9,10 +9,12 @@
 #include "parser.h"
 #include "hashtable.h"
 #include "persistence.h"
+#include <netinet/tcp.h>
 
 int main(void) {
     HashTable *ht = ht_create(16);
     aof_load(ht);
+    aof_open();
     int server_fd = start_server(6379);
     printf("Server listening on port 6379...\n");
 
@@ -49,6 +51,8 @@ int main(void) {
                     perror("accept failed");
                     continue;
                 }
+                int flag = 1;
+                setsockopt(client_fd, IPPROTO_TCP, TCP_NODELAY, &flag, sizeof(flag));
                 printf("Client connected: fd=%d\n", client_fd);
 
                 struct epoll_event client_event;
@@ -111,6 +115,7 @@ int main(void) {
        
     }
    
+    aof_close();
     ht_destroy(ht);
     return 0;
 }

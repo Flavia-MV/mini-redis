@@ -4,15 +4,27 @@
 #include "parser.h"
 
 #define AOF_FILENAME "mini_redis.aof"
+static FILE *aof_file = NULL;
+
+void aof_open(void) {
+    aof_file = fopen(AOF_FILENAME, "a");
+    if (!aof_file)
+        perror("Failed to open AOF file");
+}
+
+void aof_close(void) {
+    if (aof_file != NULL) {
+        fclose(aof_file);
+        aof_file = NULL;
+    }
+}
 
 void aof_append(const char *command_line) {
-    FILE *file = fopen(AOF_FILENAME, "a");
-    if (!file) {
-        perror("Failed to open AOF file for writing");
+    if (!aof_file) {
         return;
     }
-    fprintf(file, "%s\n", command_line);
-    fclose(file);
+    fprintf(aof_file, "%s\n", command_line);
+    fflush(aof_file);
 }
 
 void aof_load(HashTable *ht) {

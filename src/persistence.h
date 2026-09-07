@@ -3,6 +3,8 @@
 
 #include "hashtable.h"
 
+void aof_open(void);
+void aof_close(void);
 void aof_append(const char *command_line);
 void aof_load(HashTable *ht);
 
