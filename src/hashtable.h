@@ -17,7 +17,7 @@ typedef struct {
 
 HashTable *ht_create(size_t capacity);
 void ht_destroy(HashTable *ht);
-void ht_set(HashTable *ht, const char *key, const char *value);
+int ht_set(HashTable *ht, const char *key, const char *value);
 const char *ht_get(HashTable *ht, const char *key);
 int ht_delete(HashTable *ht, const char *key);
 #endif // !HASHTABLE_H

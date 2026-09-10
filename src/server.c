@@ -11,6 +11,11 @@ int start_server(int port) {
         exit(EXIT_FAILURE);
     }
 
+    int reuse = 1;
+    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse))<0) {
+        perror("setsockopt(SO_REUSEADDR) failed");
+    }
+
     struct sockaddr_in address;
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;

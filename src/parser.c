@@ -1,12 +1,29 @@
 #include <string.h>
 #include "parser.h"
 
+static int safe_copy(char *dst, size_t dst_size, const char *src) {
+    size_t len = strlen(src);
+    if (len >= dst_size)
+        return 0;
+    memcpy(dst, src, len+1);
+    return 1;
+}
+
 Command parse_command(const char *input) {
-    char buffer[512];
-    strcpy(buffer, input);
+   
+    Command cmd;
+    cmd.key[0] = '\0';
+    cmd.value[0] = '\0';
+    size_t input_len = strlen(input);
+    if (input_len >= PARSER_MAX_LINE) {
+        cmd.type = CMD_TOO_LONG;
+        return cmd;
+    }
+
+    char buffer[PARSER_MAX_LINE];
+    memcpy(buffer, input, input_len + 1);
     char *first_word = strtok(buffer, " ");
 
-    Command cmd;
     if (first_word == NULL) {
         cmd.type = CMD_UNKNOWN;
         return cmd;
@@ -23,21 +40,23 @@ Command parse_command(const char *input) {
 
     char *second_word = strtok(NULL, " ");
     if (second_word == NULL) {
-        cmd.key[0] = '\0';
-        cmd.value[0] = '\0';
         return cmd;
     }
 
-    strcpy(cmd.key, second_word);
+    if (!safe_copy(cmd.key, sizeof(cmd.key), second_word)) {
+        cmd.type = CMD_TOO_LONG;
+        return cmd;
+    }
 
     if (cmd.type == CMD_SET) {
         char *third_word = strtok(NULL, " ");
         if (third_word != NULL)
-            strcpy(cmd.value, third_word);
-        else
-            cmd.value[0] = '\0';
-    } else {
-        cmd.value[0] = '\0';
-    }
+            if (!safe_copy(cmd.value, sizeof(cmd.value), third_word)) {
+                cmd.type = CMD_TOO_LONG;
+                return cmd;
+            }
+        
+    } 
     return cmd;
 }
+
