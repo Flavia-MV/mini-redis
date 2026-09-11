@@ -1,5 +1,7 @@
 *.o
-test_ht
-mini-redis
+test_hashtable
+mini_redis
+test_parser
+test_server
 *.exe
 *.aof
